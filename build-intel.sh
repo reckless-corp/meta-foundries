@@ -3,8 +3,7 @@ set -euo pipefail
 
 cd $(dirname $(readlink -f $0))
 
-#builddir=`pwd`/.build
-builddir=/home/fio/build-tmp-delete
+builddir=`pwd`/.build
 export KAS_WORK_DIR="${builddir}/work"
 export DL_DIR="${builddir}/downloads"
 export SSTATE_DIR="${builddir}/sstate-cache"
