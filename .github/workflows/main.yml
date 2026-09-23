@@ -1,0 +1,85 @@
+name: ci-main
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ARCHIVE: /var/code/reckless-corp/storage/archive
+  KAS_CACHE: /var/code/reckless-corp/storage/kas
+
+jobs:
+  build-intel:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Kas Build
+        run: |
+          set -ex
+
+          export DL_DIR=${KAS_CACHE}/downloads
+          export SSTATE_DIR=${KAS_CACHE}/sstate-cache
+          export KAS_WORK_DIR=`pwd`/.kas-work
+          mkdir -p ${KAS_WORK_DIR}/build/conf ${DL_DIR} ${SSTATE_DIR}
+
+          ./kas-container build intel.yml
+
+      - name: Archive
+        run: |
+          set -ex
+          archive="${ARCHIVE}/meta-foundries/${GITHUB_SHA}/intel"
+          mkdir -p "${archive}"
+
+          cd .kas-work/build/tmp/deploy/images/intel-corei7-64
+          ls
+          tar -czf ${archive}/ostree_repo.tgz ostree_repo
+          cp core-image-full-cmdline-intel-corei7-64.rootfs.spdx.json ${archive}/
+          cp core-image-full-cmdline-intel-corei7-64.rootfs.wic.zst ${archive}/
+          cp core-image-full-cmdline-intel-corei7-64.rootfs.wic.qcow2 ${archive}/
+          cp ovmf* ${archive}/
+
+  build-unoq:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Kas Build
+        run: |
+          set -ex
+
+          export DL_DIR=${KAS_CACHE}/downloads
+          export SSTATE_DIR=${KAS_CACHE}/sstate-cache
+          export KAS_WORK_DIR=`pwd`/.kas-work
+          mkdir -p ${KAS_WORK_DIR}/build/conf ${DL_DIR} ${SSTATE_DIR}
+
+          ./kas-container build unoq.yml
+
+      - name: Archive
+        run: |
+          set -ex
+          archive="${ARCHIVE}/meta-foundries/${GITHUB_SHA}/unoq"
+          mkdir -p "${archive}"
+
+          cd .kas-work/build/tmp/deploy/images/uno-q
+          ls
+          tar -czf ${archive}/ostree_repo.tgz ostree_repo
+          cp -rL core-image-full-cmdline-uno-q.rootfs.qcomflash ${archive}/
+          cp core-image-full-cmdline-uno-q.rootfs.spdx.json ${archive}/
+
+  archive:
+    needs: [build-intel, build-unoq]
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Archive
+        run: |
+          set -ex
+          number="${{ github.run_id }}"
+
+          mv ${ARCHIVE}/meta-foundries/${GITHUB_SHA} ${ARCHIVE}/meta-foundries/${number}_${GITHUB_SHA}
