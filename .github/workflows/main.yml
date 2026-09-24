@@ -36,6 +36,8 @@ jobs:
         run: |
           set -ex
 
+          echo "ANDY ${{ github.run_number }}"
+
           export DL_DIR=${KAS_CACHE}/downloads
           export SSTATE_DIR=${KAS_CACHE}/sstate-cache
           export KAS_WORK_DIR=`pwd`/.kas-work
@@ -62,6 +64,6 @@ jobs:
       - name: Archive
         run: |
           set -ex
-          number="${{ github.run_id }}"
+          number="${{ github.run_number }}"
 
           mv ${ARCHIVE}/meta-foundries/${GITHUB_SHA} ${ARCHIVE}/meta-foundries/${number}_${GITHUB_SHA}
