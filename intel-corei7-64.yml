@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/siemens/kas/master/kas/schema-kas.json
+
+header:
+  version: 14
+  includes:
+    - repo: meta-foundries
+      file: ci/include/base.yml
+    - repo: meta-foundries
+      file: ci/include/nodistro.yml
+    - common.yml
+
+repos:
+  meta-intel:
+    url: https://git.yoctoproject.org/meta-intel
+    commit: 8877caca6b1fe6efe33c756698ce6ecdcaea2238
+    layers:
+      .:
+
+machine: intel-corei7-64
+
+local_conf_header:
+  sota-boot: |
+    OSTREE_BOOTLOADER = "grub"
+    EFI_PROVIDER = "grub-efi"
+    WKS_FILE:sota = "efiimage-sota.wks.in"
+    IMAGE_BOOT_FILES:sota = ""
+    IMAGE_FSTYPES:append:pn-core-image-full-cmdline = " wic wic.qcow2"
+    OSTREE_KERNEL_ARGS = "console=${KERNEL_CONSOLE} ${OSTREE_KERNEL_ARGS_COMMON}"
+    EXTRA_IMAGEDEPENDS:append = " ovmf"

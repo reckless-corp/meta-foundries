@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/siemens/kas/master/kas/schema-kas.json
+
+header:
+  version: 14
+
+repos:
+  meta-foundries:
+    url: https://github.com/foundriesio/meta-foundries
+    commit: 55e51c3dce3ce6b56b9911527353a7952ad9245e
+
+local_conf_header:
+  ci: |
+    BB_SIGNATURE_HANDLER = "OEBasicHash"
+    SOTA_SKIP_CRED_WARN = "1"
+
+  rm-work: |
+    RM_WORK_EXCLUDE += "fioconfig aktualizr-lite composectl fio-device-register"
+
+  fio: |
+    FIO_DEVICE_API = "https://dg.gavelci.us/v1/devices"
+    FIO_OAUTH_API = "https://dg.gavelci.us/oauth2"
+    IMAGE_INSTALL:append = " sudo"
