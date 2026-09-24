@@ -10,8 +10,23 @@ env:
   KAS_CACHE: /var/code/reckless-corp/storage/kas
 
 jobs:
-  build-intel:
+  build:
+    name: Build ${{ matrix.name }}
     runs-on: [self-hosted, Linux, X64]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: intel-corei7-64
+            artifacts: >-
+              core-image-full-cmdline-intel-corei7-64.rootfs.spdx.json
+              core-image-full-cmdline-intel-corei7-64.rootfs.wic.zst
+              core-image-full-cmdline-intel-corei7-64.rootfs.wic.qcow2
+              ovmf*
+          - name: uno-q
+            artifacts: >-
+              core-image-full-cmdline-uno-q.rootfs.qcomflash
+              core-image-full-cmdline-uno-q.rootfs.spdx.json
 
     steps:
       - name: Checkout
@@ -26,54 +41,21 @@ jobs:
           export KAS_WORK_DIR=`pwd`/.kas-work
           mkdir -p ${KAS_WORK_DIR}/build/conf ${DL_DIR} ${SSTATE_DIR}
 
-          ./kas-container build intel-corei7-64.yml
+          ./kas-container build ${{ matrix.name }}.yml
 
       - name: Archive
         run: |
           set -ex
-          archive="${ARCHIVE}/meta-foundries/${GITHUB_SHA}/intel"
+          archive="${ARCHIVE}/meta-foundries/${GITHUB_SHA}/${{ matrix.name }}"
           mkdir -p "${archive}"
 
-          cd .kas-work/build/tmp/deploy/images/intel-corei7-64
+          cd .kas-work/build/tmp/deploy/images/${{ matrix.name }}
           ls
-          tar -czf ${archive}/ostree_repo.tgz ostree_repo
-          cp core-image-full-cmdline-intel-corei7-64.rootfs.spdx.json ${archive}/
-          cp core-image-full-cmdline-intel-corei7-64.rootfs.wic.zst ${archive}/
-          cp core-image-full-cmdline-intel-corei7-64.rootfs.wic.qcow2 ${archive}/
-          cp ovmf* ${archive}/
-
-  build-unoq:
-    runs-on: [self-hosted, Linux, X64]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Kas Build
-        run: |
-          set -ex
-
-          export DL_DIR=${KAS_CACHE}/downloads
-          export SSTATE_DIR=${KAS_CACHE}/sstate-cache
-          export KAS_WORK_DIR=`pwd`/.kas-work
-          mkdir -p ${KAS_WORK_DIR}/build/conf ${DL_DIR} ${SSTATE_DIR}
-
-          ./kas-container build uno-q.yml
-
-      - name: Archive
-        run: |
-          set -ex
-          archive="${ARCHIVE}/meta-foundries/${GITHUB_SHA}/unoq"
-          mkdir -p "${archive}"
-
-          cd .kas-work/build/tmp/deploy/images/uno-q
-          ls
-          tar -czf ${archive}/ostree_repo.tgz ostree_repo
-          cp -rL core-image-full-cmdline-uno-q.rootfs.qcomflash ${archive}/
-          cp core-image-full-cmdline-uno-q.rootfs.spdx.json ${archive}/
+          tar -czf "${archive}/ostree_repo.tgz" ostree_repo
+          cp -rL ${{ matrix.artifacts }} "${archive}/"
 
   archive:
-    needs: [build-intel, build-unoq]
+    needs: build
     runs-on: [self-hosted, Linux, X64]
 
     steps:
