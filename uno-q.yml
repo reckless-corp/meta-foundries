@@ -5,8 +5,4 @@ header:
   includes:
     - repo: meta-foundries
       file: ci/uno-q.yml
-    - repo: meta-foundries
-      file: ci/uno-q.lock.yml
-    - repo: meta-foundries
-      file: ci/include/base.lock.yml
     - common.yml

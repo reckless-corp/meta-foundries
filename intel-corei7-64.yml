@@ -6,8 +6,6 @@ header:
     - repo: meta-foundries
       file: ci/include/base.yml
     - repo: meta-foundries
-      file: ci/include/base.lock.yml
-    - repo: meta-foundries
       file: ci/include/nodistro.yml
     - common.yml
 
