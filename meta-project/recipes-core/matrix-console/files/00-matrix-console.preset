@@ -1,0 +1,4 @@
+# Skip the masked instance when preset-all enumerates installed units.
+disable getty@tty1.service
+# Override getty@.service's DefaultInstance=tty1 while keeping tty2 enabled.
+enable getty@.service tty2

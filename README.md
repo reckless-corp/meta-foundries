@@ -52,6 +52,8 @@ systemctl enable --now matrix-console
 ```
 
 The package masks only tty1's getty and explicitly enables tty2's getty.
+Its systemd preset skips the masked tty1 instance and selects tty2 when Yocto
+applies presets during rootfs creation.
 For images without the animation, remove `matrix-console` from `IMAGE_INSTALL`
 in `common.yml` and rebuild. The getty mask belongs to that package.
 
@@ -65,7 +67,8 @@ Terminal dimensions are checked approximately once per second, falling back to
 80×24 when unavailable. Small screens clip the centered artwork.
 
 Run the terminal lifecycle and rendering checks on a Linux host with Python 3,
-`awk`, `stty`, and fractional `sleep` support:
+`awk`, `stty`, and fractional `sleep` support. The rootfs preset regression test
+also requires `systemctl` (override its path with `SYSTEMCTL` if needed):
 
 ```sh
 python3 -m unittest discover -s yocto/tests -v
