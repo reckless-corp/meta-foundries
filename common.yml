@@ -4,6 +4,10 @@ header:
   version: 14
 
 repos:
+  project:
+    layers:
+      yocto/meta-project:
+
   meta-foundries:
     url: https://github.com/foundriesio/meta-foundries
     commit: 55e51c3dce3ce6b56b9911527353a7952ad9245e
@@ -19,4 +23,4 @@ local_conf_header:
   fio: |
     FIO_DEVICE_API = "https://dg.gavelci.us/v1/devices"
     FIO_OAUTH_API = "https://dg.gavelci.us/oauth2"
-    IMAGE_INSTALL:append = " sudo"
+    IMAGE_INSTALL:append = " sudo matrix-console"

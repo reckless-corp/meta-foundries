@@ -1,0 +1,58 @@
+#!/bin/sh
+# Run on a controlling terminal; systemd supplies /dev/tty1 in production.
+export TERM="${TERM:-linux}"
+export LC_ALL=C
+data_dir=${MATRIX_DATA_DIR:-@DATADIR@/matrix-console}
+renderer=
+saved_stty=
+
+restore_display() {
+    printf '\033[0m\033[?25h\033[2J\033[H'
+    # setterm cannot query the previous VT timeout. Restore the kernel default.
+    if [ "$TERM" = linux ]; then
+        blank_seconds=600
+        if [ -r /sys/module/kernel/parameters/consoleblank ]; then
+            read -r blank_seconds < /sys/module/kernel/parameters/consoleblank
+        fi
+        case "$blank_seconds" in ''|*[!0-9]*) blank_seconds=600 ;; esac
+        setterm --blank "$(( (blank_seconds + 59) / 60 ))" || :
+    fi
+}
+
+cleanup() {
+    trap '' HUP INT TERM
+    if [ -n "$renderer" ]; then
+        kill "$renderer" 2>/dev/null || :
+        wait "$renderer" 2>/dev/null || :
+    fi
+    [ -z "$saved_stty" ] || stty "$saved_stty"
+    restore_display
+}
+
+if [ "${1:-}" = --restore ]; then
+    restore_display
+    exit 0
+fi
+if [ "$#" -ne 0 ]; then
+    echo "Usage: matrix-console [--restore]" >&2
+    exit 2
+fi
+if [ ! -r "$data_dir/matrix.awk" ] || [ ! -r "$data_dir/thumbs.txt" ]; then
+    echo "matrix-console: missing renderer or artwork in $data_dir" >&2
+    exit 1
+fi
+saved_stty=$(stty -g) || exit 1
+trap cleanup EXIT
+trap 'exit 0' HUP INT TERM
+stty -echo -ixon
+if [ "$TERM" = linux ]; then
+    setterm --blank 0 || :
+fi
+printf '\033[?25l\033[2J\033[H'
+# Keep the shell alive to restore the terminal when the renderer stops.
+awk -v artfile="$data_dir/thumbs.txt" -f "$data_dir/matrix.awk" &
+renderer=$!
+wait "$renderer"
+status=$?
+renderer=
+exit "$status"
