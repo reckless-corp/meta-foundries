@@ -1,12 +1,15 @@
 #!/bin/sh
+# SPDX-License-Identifier: BSD-2-Clause
 # Run on a controlling terminal; systemd supplies /dev/tty1 in production.
 export TERM="${TERM:-linux}"
 export LC_ALL=C
 data_dir=${MATRIX_DATA_DIR:-@DATADIR@/matrix-console}
+renderer_bin=${MATRIX_RENDERER:-@BINDIR@/matrix-render}
 renderer=
 saved_stty=
 
 restore_display() {
+    "$renderer_bin" --restore-console --tty "${MATRIX_TTY:-/dev/tty1}" || :
     printf '\033[0m\033[?25h\033[2J\033[H'
     # setterm cannot query the previous VT timeout. Restore the kernel default.
     if [ "$TERM" = linux ]; then
@@ -37,7 +40,7 @@ if [ "$#" -ne 0 ]; then
     echo "Usage: matrix-console [--restore]" >&2
     exit 2
 fi
-if [ ! -r "$data_dir/matrix.awk" ] || [ ! -r "$data_dir/thumbs.txt" ]; then
+if [ ! -x "$renderer_bin" ] || [ ! -r "$data_dir/thumbs.txt" ]; then
     echo "matrix-console: missing renderer or artwork in $data_dir" >&2
     exit 1
 fi
@@ -50,7 +53,8 @@ if [ "$TERM" = linux ]; then
 fi
 printf '\033[?25l\033[2J\033[H'
 # Keep the shell alive to restore the terminal when the renderer stops.
-awk -v artfile="$data_dir/thumbs.txt" -f "$data_dir/matrix.awk" &
+"$renderer_bin" --fb "${MATRIX_FB_DEVICE:-/dev/fb0}" \
+    --tty "${MATRIX_TTY:-/dev/tty1}" --scale "${MATRIX_SCALE:-1}" "$data_dir/thumbs.txt" &
 renderer=$!
 wait "$renderer"
 status=$?

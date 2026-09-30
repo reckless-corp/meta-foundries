@@ -10,6 +10,7 @@ StartLimitIntervalSec=0
 Type=idle
 Environment=TERM=linux
 Environment=LC_ALL=C
+EnvironmentFile=-/etc/default/matrix-console
 ExecStart=@BINDIR@/matrix-console
 ExecStopPost=@BINDIR@/matrix-console --restore
 Restart=always
