@@ -19,6 +19,9 @@ repos:
 machine: intel-corei7-64
 
 local_conf_header:
+  intel-packages: |
+    IMAGE_INSTALL:append = " git"
+
   sota-boot: |
     OSTREE_BOOTLOADER = "grub"
     EFI_PROVIDER = "grub-efi"
