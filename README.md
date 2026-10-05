@@ -20,6 +20,28 @@ switches the active VT, including when it restarts after a crash.
 
 ## Operation
 
+### Intel binary format handlers
+
+The Intel kernel configures `CONFIG_BINFMT_MISC=m`. The image explicitly installs
+`kernel-module-binfmt-misc`; enabling a module in the kernel configuration alone
+does not install its package in the root filesystem. The image also includes
+`systemd-binfmt` to mount `/proc/sys/fs/binfmt_misc` on demand and register
+handlers configured in `/etc/binfmt.d/*.conf` at boot. Interpreters such as
+QEMU and their handler definitions must be supplied separately.
+
+After rebuilding and booting the Intel image, check that the interface is enabled:
+
+```sh
+modinfo binfmt_misc
+cat /proc/sys/fs/binfmt_misc/status
+```
+
+`modinfo` should locate the module for the running kernel, and `status` should
+print `enabled`. After adding or changing handler definitions, run
+`sudo systemctl restart systemd-binfmt` to apply them.
+
+### Matrix console
+
 Run these commands as root (or using `sudo`):
 
 ```sh

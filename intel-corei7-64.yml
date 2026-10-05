@@ -20,7 +20,8 @@ machine: intel-corei7-64
 
 local_conf_header:
   intel-packages: |
-    IMAGE_INSTALL:append = " git"
+    # BINFMT_MISC is modular; explicitly install it in the root filesystem.
+    IMAGE_INSTALL:append = " git kernel-module-binfmt-misc systemd-binfmt"
 
   sota-boot: |
     OSTREE_BOOTLOADER = "grub"
