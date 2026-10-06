@@ -6,7 +6,7 @@ header:
 repos:
   project:
     layers:
-      yocto/meta-project:
+      meta-project:
 
   meta-foundries:
     url: https://github.com/foundriesio/meta-foundries

@@ -1,0 +1,80 @@
+name: ci-main
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  ARCHIVE: /var/code/reckless-corp/storage/archive
+  KAS_CACHE: /var/code/reckless-corp/storage/kas
+  KAS_CONTAINER: /var/code/reckless-corp/storage/kas/kas-container
+
+jobs:
+  yocto:
+    name: Yocto ${{ matrix.name }}
+    runs-on: [self-hosted, Linux, X64, yocto]
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: intel-corei7-64
+            artifacts: >-
+              core-image-full-cmdline-intel-corei7-64.rootfs.spdx.json
+              core-image-full-cmdline-intel-corei7-64.rootfs.wic.zst
+              core-image-full-cmdline-intel-corei7-64.rootfs.wic.qcow2
+              ovmf*
+          - name: uno-q
+            artifacts: >-
+              core-image-full-cmdline-uno-q.rootfs.qcomflash
+              core-image-full-cmdline-uno-q.rootfs.spdx.json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Kas Setup
+        run: |
+          set -ex
+          if [ ! -x "${KAS_CONTAINER}" ] ; then
+            wget -O ${KAS_CONTAINER} https://raw.githubusercontent.com/siemens/kas/refs/tags/5.5/kas-container
+            chmod +x "${KAS_CONTAINER}"
+          fi
+
+      - name: Kas Build
+        run: |
+          set -ex
+
+          export DL_DIR=${KAS_CACHE}/downloads
+          export SSTATE_DIR=${KAS_CACHE}/sstate-cache
+          export KAS_WORK_DIR=`pwd`/.kas-work
+          mkdir -p ${KAS_WORK_DIR}/build/conf ${DL_DIR} ${SSTATE_DIR}
+
+          ${KAS_CONTAINER} build ${{ matrix.name }}.yml
+
+      - name: Archive
+        run: |
+          set -ex
+          archive="${ARCHIVE}/${{ github.event.repository.name }}/${GITHUB_SHA}/${{ matrix.name }}"
+          mkdir -p "${archive}"
+
+          cd .kas-work/build/tmp/deploy/images/${{ matrix.name }}
+          ls
+          tar -czf "${archive}/ostree_repo.tgz" ostree_repo
+          cp -rL ${{ matrix.artifacts }} "${archive}/"
+
+  archive:
+    name: Archive
+    needs: [yocto]
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Archive
+        run: |
+          set -ex
+          number="${{ github.run_number }}"
+
+          mv ${ARCHIVE}/${{ github.event.repository.name }}/${GITHUB_SHA} ${ARCHIVE}/${{ github.event.repository.name }}/${number}_${GITHUB_SHA}

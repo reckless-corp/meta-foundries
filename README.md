@@ -3,8 +3,8 @@
 Build either image from the repository root:
 
 ```sh
-./yocto/build.sh intel-corei7-64.yml
-./yocto/build.sh uno-q.yml
+./build.sh intel-corei7-64.yml
+./build.sh uno-q.yml
 ```
 
 Both configurations include `meta-project` and its `matrix-console` package.
@@ -93,7 +93,7 @@ Build it locally, without BitBake:
 
 ```sh
 cc -std=c11 -O2 -Wall -Wextra -Werror \
-  yocto/experiments/framebuffer/fb-demo.c -o /tmp/fb-demo
+  experiments/framebuffer/fb-demo.c -o /tmp/fb-demo
 ```
 
 For Uno Q, use an ARM64 compiler instead of the host compiler. For example,
@@ -101,7 +101,7 @@ with a Debian ARM64 cross-toolchain installed:
 
 ```sh
 aarch64-linux-gnu-gcc -std=c11 -O2 -static -Wall -Wextra -Werror \
-  yocto/experiments/framebuffer/fb-demo.c -o /tmp/fb-demo-aarch64
+  experiments/framebuffer/fb-demo.c -o /tmp/fb-demo-aarch64
 scp /tmp/fb-demo-aarch64 uno-q-2g:/tmp/fb-demo
 ```
 
@@ -142,7 +142,7 @@ access and pixel layout; it is not an animation performance benchmark.
 Drawing tests use simulated framebuffers with padded rows and nonzero offsets:
 
 ```sh
-python3 -B -m unittest discover -s yocto/tests -p test_fb_demo.py -v
+python3 -B -m unittest discover -s tests -p test_fb_demo.py -v
 ```
 
 API references: [framebuffer layout](https://docs.kernel.org/fb/api.html),
@@ -152,7 +152,7 @@ API references: [framebuffer layout](https://docs.kernel.org/fb/api.html),
 
 The console renderer and artwork live in
 `meta-project/recipes-core/matrix-console/files`. They are a standalone
-adaptation of `../containers/matrix/matrix.sh`; the HTTP application remains
+adaptation of `../composeapps/matrix/matrix.sh`; the HTTP application remains
 independent. The Matrix console code and artwork are licensed under BSD-2-Clause
 (see `files/LICENSE.matrix-console` in the recipe); the embedded Spleen font
 retains its own BSD-2-Clause copyright notice. Both license files are installed
@@ -183,7 +183,7 @@ Build a static ARM64 executable for quick Uno Q testing (Docker and network
 access required; no Yocto build):
 
 ```sh
-yocto/experiments/framebuffer/build-matrix-static.sh
+experiments/framebuffer/build-matrix-static.sh
 scp /tmp/matrix-framebuffer-build/matrix-render-aarch64 uno-q-2g:/tmp/matrix-render
 ```
 
@@ -208,7 +208,7 @@ Run the host tests with Python 3, a C compiler (`cc`), `stty`, and `systemctl`
 (override the latter with `SYSTEMCTL` if needed):
 
 ```sh
-python3 -m unittest discover -s yocto/tests -v
+python3 -m unittest discover -s tests -v
 ```
 
 Tests use simulated framebuffer memory and device calls to check pixel formats,
