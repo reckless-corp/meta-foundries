@@ -22,6 +22,8 @@ local_conf_header:
   intel-packages: |
     # BINFMT_MISC is modular; explicitly install it in the root filesystem.
     IMAGE_INSTALL:append = " git kernel-module-binfmt-misc systemd-binfmt"
+    # Python virtual environments need ensurepip to bootstrap their own pip.
+    IMAGE_INSTALL:append = " python3-core python3-venv python3-ensurepip python3-pip"
 
   sota-boot: |
     OSTREE_BOOTLOADER = "grub"

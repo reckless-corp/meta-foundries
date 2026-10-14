@@ -20,6 +20,28 @@ switches the active VT, including when it restarts after a crash.
 
 ## Operation
 
+### Intel Python virtual environments
+
+The Intel image includes `python3-core`, `python3-venv`, `python3-ensurepip`,
+and `python3-pip`. Yocto packages the interpreter as `python3-core` and splits
+standard-library modules into separate packages. `ensurepip` bootstraps pip
+inside new virtual environments.
+
+Rebuild with `./build.sh intel-corei7-64.yml`. After booting the updated image,
+create an environment in your writable home directory:
+
+```sh
+python3 -m venv "$HOME/.venvs/myapp"
+. "$HOME/.venvs/myapp/bin/activate"
+python -m pip --version
+python -c 'import sys; assert sys.prefix != sys.base_prefix'
+deactivate
+```
+
+While activated, use `python -m pip install <package>` to install packages into
+the environment. Packages with native extensions may need additional build
+tools and libraries.
+
 ### Intel binary format handlers
 
 The Intel kernel configures `CONFIG_BINFMT_MISC=m`. The image explicitly installs
