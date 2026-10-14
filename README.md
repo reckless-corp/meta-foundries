@@ -62,6 +62,30 @@ cat /proc/sys/fs/binfmt_misc/status
 print `enabled`. After adding or changing handler definitions, run
 `sudo systemctl restart systemd-binfmt` to apply them.
 
+### Intel VM networking
+
+The Intel kernel includes modular TUN/TAP and MACVTAP support. The
+`vm-networking.cfg` fragment enables `CONFIG_TUN=m`, `CONFIG_MACVLAN=y`, and
+`CONFIG_MACVTAP=m`; MACVTAP also selects the shared `CONFIG_TAP` helper.
+Ordinary TAP interfaces use the `tun` module, despite the helper's name.
+MACVLAN is built into the kernel and has no module package. The Intel image
+installs the `tun`, `macvtap`, and `tap` modules and loads `tun` and `macvtap` at boot.
+The kernel append is enabled only when `meta-intel` is present.
+
+Rebuild with `./build.sh intel-corei7-64.yml`, deploy the updated image, and
+reboot into its kernel. On the target, verify:
+
+```sh
+sudo modprobe tun
+sudo modprobe macvtap
+test -c /dev/net/tun && echo 'TUN/TAP ready'
+modinfo macvtap
+```
+
+This supplies the drivers for `ip tuntap add ... mode tap` and
+`ip link add ... type macvtap`. Interface creation and guest IP configuration
+remain separate steps.
+
 ### Matrix console
 
 Run these commands as root (or using `sudo`):

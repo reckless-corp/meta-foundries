@@ -31,6 +31,11 @@ local_conf_header:
     IMAGE_INSTALL:append = " kernel-module-kvm kernel-module-kvm-intel"
     KERNEL_MODULE_AUTOLOAD:append:pn-linux-intel = " kvm_intel"
 
+  intel-vm-networking: |
+    # MACVLAN is built in; only the modular drivers have installable packages.
+    IMAGE_INSTALL:append = " kernel-module-tun kernel-module-macvtap kernel-module-tap"
+    KERNEL_MODULE_AUTOLOAD:append:pn-linux-intel = " tun macvtap"
+
   sota-boot: |
     OSTREE_BOOTLOADER = "grub"
     EFI_PROVIDER = "grub-efi"
