@@ -12,7 +12,7 @@ header:
 repos:
   meta-intel:
     url: https://git.yoctoproject.org/meta-intel
-    commit: 8877caca6b1fe6efe33c756698ce6ecdcaea2238
+    commit: fcd2544222aa8e2f6caf100b854971cf1618a8fe  # wrynose branch
     layers:
       .:
 

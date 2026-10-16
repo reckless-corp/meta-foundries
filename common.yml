@@ -10,7 +10,7 @@ repos:
 
   meta-foundries:
     url: https://github.com/foundriesio/meta-foundries
-    commit: 55e51c3dce3ce6b56b9911527353a7952ad9245e
+    commit: d218cbfa7114f82d45c78cbcd9754928ef713fa5
 
 local_conf_header:
   ci: |
