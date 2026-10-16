@@ -24,6 +24,8 @@ local_conf_header:
     IMAGE_INSTALL:append = " git kernel-module-binfmt-misc systemd-binfmt"
     # Python virtual environments need ensurepip to bootstrap their own pip.
     IMAGE_INSTALL:append = " python3-core python3-venv python3-ensurepip python3-pip"
+    # NFS server userspace tools, including exportfs.
+    IMAGE_INSTALL:append = " nfs-utils"
 
   intel-kvm: |
     # Enable host virtualization and install the modules in the root filesystem.
