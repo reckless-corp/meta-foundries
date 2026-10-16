@@ -30,8 +30,8 @@ local_conf_header:
   intel-kvm: |
     # Enable host virtualization and install the modules in the root filesystem.
     KERNEL_FEATURES:append:pn-linux-intel = " features/kvm/qemu-kvm-enable.scc"
-    IMAGE_INSTALL:append = " kernel-module-kvm kernel-module-kvm-intel"
-    KERNEL_MODULE_AUTOLOAD:append:pn-linux-intel = " kvm_intel"
+    IMAGE_INSTALL:append = " kernel-module-kvm kernel-module-kvm-intel kernel-module-kvm-amd"
+    KERNEL_MODULE_AUTOLOAD:append:pn-linux-intel = " kvm_intel kvm_amd"
 
   intel-vm-networking: |
     # MACVLAN is built in; only the modular drivers have installable packages.
