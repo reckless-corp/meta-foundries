@@ -6,3 +6,9 @@ header:
     - repo: meta-foundries
       file: ci/uno-q.yml
     - common.yml
+
+local_conf_header:
+  dev-adbd: |
+    # adb reaches the console on boards with no bughopper attached.
+    IMAGE_CLASSES += "image-adbd"
+    EXTRA_IMAGE_FEATURES += "enable-adbd"
