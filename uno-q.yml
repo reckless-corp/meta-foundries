@@ -8,6 +8,22 @@ header:
     - common.yml
 
 local_conf_header:
+  uno-q-desktop: |
+    # Keep core-image-full-cmdline and the Foundries services; add only the
+    # desktop/runtime packages instead of qcom-multimedia-image's media stack.
+    DISTRO_FEATURES:append = " wayland opengl pam"
+    DISTRO_FEATURES:remove = "x11"
+    IMAGE_INSTALL:append = " weston weston-init liberation-fonts gtk+3"
+    # Matrix owns tty1 and draws directly to the framebuffer.
+    IMAGE_INSTALL:remove = "matrix-console"
+    # Direct package installation does not enable the weston image feature,
+    # so explicitly boot the target that starts weston-init's service.
+    SYSTEMD_DEFAULT_TARGET = "graphical.target"
+    # clients builds weston-terminal, shipped in weston itself, without
+    # installing weston-examples. Keep just DRM/EGL and the desktop shell.
+    PACKAGECONFIG:pn-weston = "kms egl clients systemd shell-desktop image-jpeg"
+    PACKAGECONFIG:remove:pn-weston-init = "xwayland"
+
   dev-adbd: |
     # adb reaches the console on boards with no bughopper attached.
     IMAGE_CLASSES += "image-adbd"

@@ -7,8 +7,9 @@ Build either image from the repository root:
 ./build.sh uno-q.yml
 ```
 
-Both configurations include `meta-project` and its `matrix-console` package.
-After normal boot messages, the first Linux virtual console (`/dev/tty1`,
+Both configurations include `meta-project`. UNO Q boots a minimal Weston desktop
+with GTK 3 support (see below). Intel includes the `matrix-console` package.
+On Intel, after normal boot messages, the first Linux virtual console (`/dev/tty1`,
 normally the HDMI display) shows green Matrix rain and the Thumbs Up artwork.
 This runs directly on the console, without a container or network connection.
 The BSP must provide a working fbdev framebuffer (/dev/fb0) and virtual console;
@@ -19,6 +20,38 @@ animation. Existing SSH and serial access are unaffected. The service never
 switches the active VT, including when it restarts after a crash.
 
 ## Operation
+
+### UNO Q desktop
+
+`uno-q.yml` keeps `core-image-full-cmdline` and the Foundries services, adding
+`weston`, `weston-init`, `liberation-fonts`, and `gtk+3` (the GTK 3 runtime,
+including `libgtk-3.so.0`). It removes `matrix-console` for this image and disables
+X11/XWayland. GTK applications use Wayland; development headers and GTK demos
+are not installed.
+
+Weston starts automatically at `graphical.target`, using the standard
+unprivileged `weston` session on tty7. This is automatic desktop login, with no
+graphical password prompt. The inherited Qualcomm configuration supplies a
+panel launcher for `weston-terminal`, which is included in the `weston` package.
+Use **Ctrl+Alt+F2** for a text login and **Ctrl+Alt+F7** to return to Weston.
+
+This avoids switching to
+[qcom-multimedia-image](https://github.com/qualcomm-linux/meta-qcom-distro/blob/wrynose/recipes-products/images/qcom-multimedia-image.bb),
+which also installs camera, GStreamer, PipeWire, benchmark/test and AI packages.
+The existing Qualcomm distro and BSP dependencies still apply; the size saving
+has not been measured.
+
+Build with `./build.sh uno-q.yml`. After deploying and booting, check:
+
+```sh
+systemctl get-default                    # graphical.target
+systemctl status weston.service
+journalctl -b -u weston.service
+```
+
+Open the panel terminal, then run `echo "$WAYLAND_DISPLAY"` and a GTK application
+with `GDK_BACKEND=wayland`. Confirm HDMI output, keyboard/mouse input, and VT
+switching on the board; recipe checks alone cannot validate the display driver.
 
 ### Intel Python virtual environments
 
