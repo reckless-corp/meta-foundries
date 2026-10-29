@@ -53,6 +53,33 @@ Open the panel terminal, then run `echo "$WAYLAND_DISPLAY"` and a GTK applicatio
 with `GDK_BACKEND=wayland`. Confirm HDMI output, keyboard/mouse input, and VT
 switching on the board; recipe checks alone cannot validate the display driver.
 
+### UNO Q AppImage support
+
+The UNO Q kernel builds FUSE as a module (`CONFIG_FUSE_FS=m`). The image installs
+`kernel-module-fuse`, `fuse`, and `fuse-utils`, providing `libfuse.so.2`,
+`fusermount`, and `mount.fuse`. The FUSE package loads the module at boot.
+FUSE 2 is included for compatibility with
+[AppImage runtimes that require it](https://docs.appimage.org/user-guide/troubleshooting/fuse.html).
+
+After rebuilding and booting the updated image, check:
+
+```sh
+modinfo fuse
+test -c /dev/fuse && echo 'FUSE ready'
+fusermount --version
+```
+
+Use an AArch64/ARM64 AppImage for UNO Q. From the Weston terminal, mark it
+executable and run it as the desktop user:
+
+```sh
+chmod +x ./MyApp-aarch64.AppImage
+./MyApp-aarch64.AppImage
+```
+
+The desktop provides Wayland only, so the application must support Wayland;
+FUSE support alone does not supply X11/XWayland or other application dependencies.
+
 ### Intel Python virtual environments
 
 The Intel image includes `python3-core`, `python3-venv`, `python3-ensurepip`,

@@ -24,6 +24,11 @@ local_conf_header:
     PACKAGECONFIG:pn-weston = "kms egl clients systemd shell-desktop image-jpeg"
     PACKAGECONFIG:remove:pn-weston-init = "xwayland"
 
+  uno-q-fuse: |
+    # AppImage runtimes may dlopen libfuse.so.2; FUSE 3 alone is insufficient.
+    # fuse supplies modules-load.d/fuse.conf for automatic loading at boot.
+    IMAGE_INSTALL:append = " kernel-module-fuse fuse fuse-utils"
+
   dev-adbd: |
     # adb reaches the console on boards with no bughopper attached.
     IMAGE_CLASSES += "image-adbd"
